@@ -26,14 +26,43 @@
 
 ## 安装
 
-### A. bundle 安装（正式）
+### A. git 安装（正式，已真机实测）
+
+```
+dsh plugin --profile web add github:uppercrusteve/dsh-tool-health
+# 锁定发布 tag（可复现）：
+dsh plugin --profile web add github:uppercrusteve/dsh-tool-health#v0.1.0
+```
+
+profile 的 `package.json` 会同时记入 `dependencies` 与 `dsh.profile.bundles`（宿主按已安装
+状态调和），启动时自动应用 `dsh.bundle.patch` 声明的
+`examples/tool-health.bundle.patch.yml`——**不需要** `--patch`。
+卸载：`dsh plugin --profile web remove @uppercrusteve/dsh-tool-health`。
+
+Windows 实测记录（2026-08-28，隔离 `DSH_HOME`，宿主为 DSH Desktop 自带 dsh）：
+
+- `add github:uppercrusteve/dsh-tool-health` 后三项齐备：`dependencies` 记入、
+  `dsh.profile.bundles` 记入、`node_modules/@uppercrusteve/dsh-tool-health/src/index.js` 存在；
+  安装件 `src/index.js` 28804 字节 / sha256 `eea90a9f…9cc6a1` / 行尾 LF，与 raw.githubusercontent
+  及仓库 blob 逐字节一致（`.gitattributes` 的 `* text=auto eol=lf` 生效，安装不被 CRLF 污染）。
+- 免 `--patch` 起 web：`[tool-health] apply ok … configSource=patch(windowDays+warnMinFailures+warnMinRate)`，
+  无 `plugin tree failed`；`GET /dsh-tool-health/summary` 返回 200 且 JSON 形状正确；`/` 返回 200。
+- `#v0.1.0` 锁 tag 形态等价可用（依赖记为 `github:uppercrusteve/dsh-tool-health#v0.1.0`，
+  安装件 sha 同上），boot 与 summary 表现一致。
+- `remove` 后三项清除（依赖、bundles、`node_modules` 内包体均消失；pnpm 会留一个空的
+  `node_modules\@uppercrusteve` 作用域目录，无内容、不参与启动）；再起 web：`/` 200、
+  `/dsh-tool-health/summary` 404、日志无 `[tool-health]` 行。
+
+默认分支为 `main`；不带 ref 的 `github:` 形式解析到 `main` HEAD，`#v0.1.0` 钉住发布提交
+（两者 `src/index.js` 内容相同）。
+
+### A2. npm 安装（尚未发布）
 
 ```
 dsh plugin --profile web add @uppercrusteve/dsh-tool-health
 ```
 
-profile 的 package.json 会记入 `dsh.profile.bundles`，启动时自动应用
-`dsh.bundle.patch` 声明的 `examples/tool-health.bundle.patch.yml`。
+npm registry 目前对该包名返回 404——发布之后此形式才可用；在那之前请用上面的 `github:` 形式。
 
 ### B. dev patch（免安装迭代）
 
