@@ -1,0 +1,36 @@
+{
+  "name": "@uppercrusteve/dsh-tool-health",
+  "version": "0.1.0",
+  "description": "Tool-health sentinel for DSH: cross-session tool success/latency/error history, chronic-failure warning injected into the system prompt, report tool + /tool-health command + GET /dsh-tool-health/summary.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "author": "uppercrusteve",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uppercrusteve/dsh-tool-health.git"
+  },
+  "bugs": {
+    "url": "https://github.com/uppercrusteve/dsh-tool-health/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "tool-health",
+    "observability"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "examples/tool-health.bundle.patch.yml"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+# dsh-tool-health bundle layer (the file declared by package.json dsh.bundle.patch).
+# Applied automatically at boot for every profile whose package.json lists
+# "@uppercrusteve/dsh-tool-health" in dsh.profile.bundles (that row is
+# added/removed by:  dsh plugin --profile <name> add|remove @uppercrusteve/dsh-tool-health).
+# The row name is the PACKAGE QUALIFIER; the host entry is src/index.js via
+# package.json exports["."]. Host-only plugin: no client bundle, no UI slots.
+# The optional config block overrides the plugin defaults
+# (windowDays / warnWindowDays / warnMinFailures / warnMinRate /
+#  maxEntriesPerTool / flushDebounceMs) -- see README "Config".
+- insert:
+    - id: tool-health
+      name: '@uppercrusteve/dsh-tool-health'
+      config:
+        windowDays: 14
+        warnMinFailures: 5
+        warnMinRate: 0.3

@@ -1,0 +1,15 @@
+# dsh-tool-health dev overlay (no install needed): pass with --patch while iterating.
+#   $env:DSH_HOME='<isolated home>'
+#   node "<dsh bin>" --profile web --patch "<this file>" --port 18781 --no-open
+# Same insert row as the bundle layer, EXCEPT the name must be a file:/// URL here:
+# a bare Windows path (D:\...) is handed to the ESM loader as a URL, "D:" becomes a
+# protocol and the WHOLE plugin tree dies with ERR_UNSUPPORTED_ESM_URL_SCHEME
+# (lesson from dsh-converge, measured in its notes/P0-RESULTS.md item 0).
+# The config block here also proves the patch-line config override path; drop it
+# to run with defaults {windowDays:14, warnMinFailures:5, warnMinRate:0.3}.
+# EDIT THE PATH BELOW to your checkout before use.
+- insert:
+    - id: tool-health
+      name: 'file:///D:/codingspace/labs/dsh-tool-health/plugin/src/index.js'
+      config:
+        windowDays: 21

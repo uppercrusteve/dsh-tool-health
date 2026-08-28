@@ -1,0 +1,8 @@
+node_modules/
+*.log
+*.tmp
+home/
+tests/runs/
+notes/
+package-lock.json
+.DS_Store
