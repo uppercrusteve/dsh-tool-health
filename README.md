@@ -82,6 +82,8 @@ dsh plugin --profile web add @uppercrusteve/dsh-tool-health@preview
 > `~/.npmrc`；随后在本目录执行 `npm publish --access public --tag preview`
 > （账号强制 OTP 时带 `--otp=123456`），成功判据是
 > `npm view @uppercrusteve/dsh-tool-health dist-tags` 显示 `preview=0.1.0`。
+> 发布物本身已验过：`npm publish --dry-run --access public --tag preview` 通过
+> （6 个文件 / 15.5 kB / shasum `acdd106…`），不需要改打包配置——重登后原命令即可发出。
 
 ### B. dev patch（免安装迭代）
 
