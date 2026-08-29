@@ -56,34 +56,37 @@ Windows 实测记录（2026-08-28，隔离 `DSH_HOME`，宿主为 DSH Desktop �
 默认分支为 `main`；不带 ref 的 `github:` 形式解析到 `main` HEAD，`#v0.1.0` 钉住发布提交
 （两者 `src/index.js` 内容相同）。
 
-### A2. npm 安装（尚未发布）
-
-```
-dsh plugin --profile web add @uppercrusteve/dsh-tool-health
-```
-
-npm registry 目前对该包名返回 404——发布之后此形式才可用；在那之前请用上面的 `github:` 形式。
-
-发布后生效（预置命令，包发出当日即可用；首发走 `--tag preview`，故显式钉 tag）：
+### A2. npm 安装（已发布）
 
 ```
 dsh plugin --profile web add @uppercrusteve/dsh-tool-health@preview
 ```
 
-> 首发阻塞中（2026-08-29）：`npm publish --access public --tag preview` 报
-> `E404 Not Found - PUT https://registry.npmjs.org/@uppercrusteve%2fdsh-tool-health`。
-> 根因是本机 `~/.npmrc` 的 granular token 已失效——`npm whoami` 与直接
-> `GET /-/whoami` 都返回 401，未认证身份对不存在的新 scoped 包做 PUT 时 registry
-> 伪装成 404；不是包名冲突，也不是 scope 无建包权限（同 scope 的
-> `@uppercrusteve/dsh-converge` 已在 registry 上，`npm view` 可查）。等用户在本地
-> 重新认证即可发出：`npm logout && npm login`（web flow，绕开坏 token），或到
-> npmjs.com → Access Tokens 新建 Granular Access Token（Packages 选 **Read and
-> write**，账号已开 2FA 则勾选 **Bypass two-factor authentication**）写回
-> `~/.npmrc`；随后在本目录执行 `npm publish --access public --tag preview`
-> （账号强制 OTP 时带 `--otp=123456`），成功判据是
-> `npm view @uppercrusteve/dsh-tool-health dist-tags` 显示 `preview=0.1.0`。
-> 发布物本身已验过：`npm publish --dry-run --access public --tag preview` 通过
-> （6 个文件 / 15.5 kB / shasum `acdd106…`），不需要改打包配置——重登后原命令即可发出。
+首发经 `npm publish --access public --tag preview`（CLI 回执 `+ @uppercrusteve/dsh-tool-health@0.1.0`），
+故安装显式钉 `@preview`：预览期 dev 迭代只推 `preview`，`latest` 留到定稿才推进。
+装前可 `npm view @uppercrusteve/dsh-tool-health dist-tags` 核对；首发经 `--tag preview`，
+遇 npm 读副本传播延迟（新包发布后公共读端点可短暂 404）稍后重试即可。
+
+Windows 实测记录（2026-08-29，隔离 `DSH_HOME`，`--profile web`，npm `@preview` 形态，免 `--patch`）：
+
+- `add @uppercrusteve/dsh-tool-health@preview` 后三项齐备：`dependencies` 记入 `^0.1.0`、
+  `dsh.profile.bundles` 记入、`node_modules/@uppercrusteve/dsh-tool-health/src/index.js` 存在，
+  安装版本 `0.1.0`；tarball 内容 6 文件（`LICENSE`、`package.json`、`README.md`、`src/index.js`
+  与 `examples/` 两个 patch yml）。
+- 安装件 `src/index.js` 28804 字节 / sha256 `eea90a9f…9cc6a1` / 行尾 LF，与 raw.githubusercontent
+  `main`（当时 HEAD `f56d046`）**逐字节一致**——npm 发布件与 GitHub 源码零漂移（发布后仅 README 有改动）。
+- 免 `--patch` 起 web：`[tool-health] apply ok v=0.1.0 … configSource=patch(windowDays+warnMinFailures+warnMinRate)`、
+  `section=ok`，`route /dsh-tool-health/summary mounted` 与 `command /tool-health mounted` 两行齐备；
+  无 `plugin tree failed`、无 `apply FAILED`；`GET /dsh-tool-health/summary` 返回 200（JSON 形状正确：
+  `plugin=dsh-tool-health`、`retryPolicy=v0.1-observe-only`、含 `tools` 段，`config.windowDays=14`）；`/` 200。
+- `remove` 后三项清除（依赖、bundles、`node_modules` 内包体均消失；pnpm 会留一个空的
+  `node_modules\@uppercrusteve` 作用域目录，无内容、不参与启动）；再起 web：`/` 200、
+  `/dsh-tool-health/summary` 404、日志无 `[tool-health]` 行、无树错误。
+- registry 实测值（2026-08-29 11:17 本地）：`dist-tags` = `preview=0.1.0`、`latest=0.1.0`，
+  packument `time.created=2026-08-29T03:13:16Z`；发布后头约 4 分钟 packument 读端点返回 404
+  （读副本传播；同期 tarball 直取 200 / 15637 B 合法 gzip，搜索索引已含 0.1.0），随后转可读。
+- 证据：`tests/runs/TH.audit.log` 中 `runner=th-npm` 四轮（npm-precheck / npm-add / npm-boot /
+  npm-remove），每轮 `POLLUTION_CHECK … paths=13 changed=0 clean`；输出件 `npm-*.out.txt` / `npm-*.err.txt`。
 
 ### B. dev patch（免安装迭代）
 
