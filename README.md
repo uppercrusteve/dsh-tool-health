@@ -64,6 +64,25 @@ dsh plugin --profile web add @uppercrusteve/dsh-tool-health
 
 npm registry 目前对该包名返回 404——发布之后此形式才可用；在那之前请用上面的 `github:` 形式。
 
+发布后生效（预置命令，包发出当日即可用；首发走 `--tag preview`，故显式钉 tag）：
+
+```
+dsh plugin --profile web add @uppercrusteve/dsh-tool-health@preview
+```
+
+> 首发阻塞中（2026-08-29）：`npm publish --access public --tag preview` 报
+> `E404 Not Found - PUT https://registry.npmjs.org/@uppercrusteve%2fdsh-tool-health`。
+> 根因是本机 `~/.npmrc` 的 granular token 已失效——`npm whoami` 与直接
+> `GET /-/whoami` 都返回 401，未认证身份对不存在的新 scoped 包做 PUT 时 registry
+> 伪装成 404；不是包名冲突，也不是 scope 无建包权限（同 scope 的
+> `@uppercrusteve/dsh-converge` 已在 registry 上，`npm view` 可查）。等用户在本地
+> 重新认证即可发出：`npm logout && npm login`（web flow，绕开坏 token），或到
+> npmjs.com → Access Tokens 新建 Granular Access Token（Packages 选 **Read and
+> write**，账号已开 2FA 则勾选 **Bypass two-factor authentication**）写回
+> `~/.npmrc`；随后在本目录执行 `npm publish --access public --tag preview`
+> （账号强制 OTP 时带 `--otp=123456`），成功判据是
+> `npm view @uppercrusteve/dsh-tool-health dist-tags` 显示 `preview=0.1.0`。
+
 ### B. dev patch（免安装迭代）
 
 ```
