@@ -135,6 +135,16 @@ apply 成功后 stdout 打印一行：
 
 可选 `DSH_TOOLHEALTH_LOG=<file.jsonl>` 落结构化取证日志。
 
+## 静态检查（CI）
+
+`.github/workflows/ci.yml` 每次 push 与 PR 跑三件事：
+
+1. `node --check` 全部 `src/`、`lib/`、`scripts/` 源文件
+2. `scripts/check-manifest.mjs`：包名、许可证、`files`/`exports` 声明的路径是否真实存在，patch 是否引用了本包名
+3. `npm pack --dry-run` 后核对声明项有没有真的打进包
+
+**范围说明**：CI 跑不了 `dsh` 宿主，也没有真机安装。宿主侧行为（BOOT 四事件、`/dsh-tool-health/summary` 返回、卸载后的路径清理）仍以上文 2026-08-28 的实测记录为准，CI 只保证"清单自洽、语法能过、发布不漏件"。
+
 ## License
 
 MIT © 2026 uppercrusteve

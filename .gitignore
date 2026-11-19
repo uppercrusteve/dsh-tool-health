@@ -6,3 +6,4 @@ tests/runs/
 notes/
 package-lock.json
 .DS_Store
+pack.json

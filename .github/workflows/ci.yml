@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 语法检查
+        run: |
+          shopt -s nullglob
+          files=(src/*.js lib/*.js scripts/*.mjs tests/*.mjs)
+          if [ ${#files[@]} -eq 0 ]; then echo "没有可检查的源文件"; exit 1; fi
+          for f in "${files[@]}"; do node --check "$f"; done
+
+      - name: 清单自洽
+        run: node scripts/check-manifest.mjs
+
+      - name: 打包不漏件
+        run: |
+          npm pack --dry-run --json > pack.json
+          node scripts/check-pack.mjs
+
+      - name: 模块能被解析
+        run: node -e 'import("./" + JSON.parse(require("node:fs").readFileSync("package.json","utf8")).main.replace(/^\.\//,"")).then(() => console.log("入口可加载"))'
