@@ -1,11 +1,13 @@
 # dsh-tool-health
 
-工具健康度哨兵（DSH host 端插件，v0.1.0，零 npm 依赖）。
+DSH host 端插件（v0.1.0，零 npm 依赖）。agent 对工具的间歇性故障没有跨会话记忆，会反复撞同一个坏工具白烧回合——这个插件把每次执行结果记下来，下次会话开局就把慢性失败的工具写进系统提示，让它先绕开。
 
-痛点：agent 对工具的间歇性故障没有跨会话记忆，反复撞同一个坏工具浪费回合。
-本插件在每次工具执行落定后记录 `{tool, ok, ms, errorClass, err?}`，持久化到
-`$DSH_HOME/tool-health/history.json`（滚动窗口：每工具近 `windowDays` 天、上限
-`maxEntriesPerTool` 条），并在会话启动时把"慢性失败工具"警告注入系统提示。
+```
+tool_health_report   → 近 7 天体检表（调用数 / 成功率 / 错误分布 / p50·p95 / 最近一次失败）
+系统提示            → ⚠ tool-health: 近期高失败率工具 foo(62%) bar(41%)——先换替代或查依赖
+```
+
+每次工具执行落定后记 `{tool, ok, ms, errorClass, err?}`，写进 `$DSH_HOME/tool-health/history.json`：每工具只看近 `windowDays` 天，单工具上限 `maxEntriesPerTool` 条。
 
 ## 行为
 
